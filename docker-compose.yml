@@ -10,7 +10,7 @@ services:
     - DB_CONNECTION=mongodb
     - DB_HOST=mongodb
     - DB_PORT=27017
-    - DB_DATABASE=ikea_clone
+    - DB_DATABASE=mydatabase
     - DB_USERNAME=root
     - DB_PASSWORD=root
     volumes:
@@ -22,7 +22,7 @@ services:
     ports:
       - 27017:27017
     environment:
-      - MONGO_INITDB_DATABASE=ikea_clone
+      - MONGO_INITDB_DATABASE=mydatabase
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=root
   mongo-express:
