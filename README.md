@@ -16,6 +16,7 @@ Crear carpeta *docker* dentro de la estructura del proyecto de laravel, dentro d
 En el archivo *Dockerfile*:
 ```
 # Usamos la imagen base de PHP con Apache
+# Usamos la imagen base de PHP con Apache
 FROM php:8.1-apache
 
 # Establecemos el directorio de trabajo en /var/www/html
@@ -44,7 +45,7 @@ COPY ./docker/apache2.conf /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite
 
 # Instalamos las dependencias de Node.js y npm
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y nodejs
 
 # Exponemos el puerto 80 para acceder a la aplicación web
@@ -57,6 +58,10 @@ RUN pecl install mongodb \
     && docker-php-ext-enable mongodb
 
 RUN pecl config-set php_ini /etc/php.ini
+
+# Instalamos las dependencias de Node.js
+RUN npm install
+RUN npm install @popperjs/core
 
 # Ejecutamos el servidor Apache en primer plano
 CMD ["apache2-foreground"]
@@ -189,6 +194,21 @@ Añadir en el fichero config/app.php dentro del array de *providers*:
 Jenssegers\Mongodb\MongodbServiceProvider::class,
 ```
 
+###### ACLARACIÓN
+Es posible que el contenedor de laravel no se levante debido a que en windows puede que tengamos que ejecutar ciertos comandos antes.
+
+Pararemos el resto de contenedores y desde la carpeta '**my-project**' ejecutaremos:
+```
+composer install
+```
+Con esto instalaremos las dependencias definidas en el archivo **composer.json** y se debe crear una carpeta llamada **vendor**.
+
+También debemos instalar las dependencias de NPM definidas en el archivo **package.json** con:
+
+```
+npm install
+```
+Y en esta ocasión vemos cómo se crea la carpeta node_modules.
 
 ## Paso 7: Ejecutar las migraciones
 
@@ -201,4 +221,69 @@ Podemos acceder a *http://localhost:8081/* y comprobar que se ha creado la base 
 
 ![image](https://github.com/anmamebo/laravel-mongodb-crud/assets/74211239/dcdc3ecc-cfd9-45fb-996b-69d9737e6146)
 ![image](https://github.com/anmamebo/laravel-mongodb-crud/assets/74211239/c66ff603-60c9-4758-a9d7-9e5f316432f8)
+
+## Paso opcional: Instalar bootstrap
+
+Ejecutar los siguientes comandos:
+
+```
+npm i bootstrap --save-dev
+```
+
+```
+npm install sass --save-dev
+```
+
+Cambiar el nombre del fichero *resources/css/app.css* a *app.scss*
+
+Abrir el archivo *vire.config.js* de la raiz del proyecto y cambiar la referencia *resources/css/app.css* por *resources/css/app.scss*
+
+En el archivo *resources/css/app.scss* improta Bootstrap agregando la siguiente línea de código:
+```
+@import 'bootstrap/scss/bootstrap';
+```
+
+En el archivo *resources/js/app.js* agrega el siguiente código:
+```
+import * as bootstrap from 'bootstrap';
+```
+
+Para poder usarlo en nuestras vistas (blade.php) usar en el \<head>:
+```
+@vite(['resources/js/app.js', 'resources/css/app.scss'])
+```
+    
+Para que funcione debemos ejecutar en la raíz del proyecto **(probado fuera del contenedor)**:
+```
+npm run dev
+```
+
+## Paso opcional: Usar mongosh
+
+Para ello debemos ejecutar el siguiente comando para saber la id del contenedor de mongodb: 
+```
+docker ps
+```
+Copiamos la id y ejecutamos el siguiente comando:
+```
+docker exec -it <id_contenedor> bash
+```
+A continuación, ejecutamos: 
+```
+mongosh --username "root" --password "root"
+```
+Y ya podemos empezar a ejecutar comandos de mongo, por ejemplo:
+```
+show databases
+```
+```
+use mydatabase
+```
+```
+show collections
+```
+```
+db.books.find()
+```
+
 
