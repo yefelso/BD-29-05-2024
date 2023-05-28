@@ -34,9 +34,6 @@ COPY . /var/www/html
 # Instalamos las dependencias de Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Instalamos las dependencias de Laravel
-# RUN composer install --no-scripts --no-autoloader
-
 # Generamos el archivo autoload de Composer
 RUN composer dump-autoload
 
@@ -45,6 +42,10 @@ COPY ./docker/apache2.conf /etc/apache2/sites-available/000-default.conf
 
 # Habilitamos el módulo de reescritura de Apache
 RUN a2enmod rewrite
+
+# Instalamos las dependencias de Node.js y npm
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+    && apt-get install -y nodejs
 
 # Exponemos el puerto 80 para acceder a la aplicación web
 EXPOSE 80
